@@ -2,6 +2,7 @@ import React from 'react'
 import tick from '../assets/tick.png'
 import not_tick from '../assets/not_tick.png'
 import delete_icon from '../assets/delete.png'
+import edit_icon from '../assets/edit_icon.png'
 
 
 
@@ -16,11 +17,12 @@ const TodoItems = ({text, id , isComplete, deleteTask, toggle}) => {
                 {text}
             </p>
         </div>
-
+        
+        <img src={edit_icon} alt="delete_icon" className='w-4 cursor-pointer mr-3.5' />
         <img  onClick={deleteTask} src={delete_icon} alt="delete_icon" className='w-3.5 cursor-pointer' />
 
     </div>
   )
 }
 
-export default TodoItems
+export default TodoItems;

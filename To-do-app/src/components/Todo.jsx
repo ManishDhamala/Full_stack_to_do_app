@@ -6,12 +6,6 @@ import { deleteTask, getAllTasks, sendTask } from '../restful-api/DataFunction';
 
 const Todo = () => {
 
-// (Condition check) ? converting string into array to get the data from local storage and if empty returning null
-  // const [todoList, setTodoList] = useState(localStorage.getItem("todos")? JSON.parse(localStorage.getItem("todos")) : []); 
-
-  // const inputRef = useRef();
-
-
   // -----------------------------Practice backend------------------
 
   // Getting the data from the server
@@ -36,6 +30,7 @@ const Todo = () => {
 
   },[]);
 
+
   // Sending the data to the server
 
   const initialState = {task:"", completed: false};
@@ -59,8 +54,11 @@ const Todo = () => {
       if(response.status === 200){
       console.log("New Task added")
 
+        // Assuming the response contains the task with its assigned ID from the backend
+        const addedTask = response.data;
+
        // Update the tasks state with the newly added task
-       setTasks(prevTasks => [...prevTasks, newTask]);
+       setTasks(prevTasks => [...prevTasks, addedTask]);
 
       // Reset the newTask state to clear the input field
       dispatch({ field: 'task', value: '' });
@@ -73,27 +71,13 @@ const Todo = () => {
 
 
   //Deleting the data from the server
-
-  // const deleteTaskPromise = deleteTask(id);
-  //     deleteTaskPromise.then(response => {
-  //       if(response.status === 200 || response.status === 204){
-  //         console.log("Task Deleted");
-  //       }else{
-  //         setErrorMessage("Error! - "+response.statusText);
-  //       }
-  //     })  .catch(error => {
-  //           setErrorMessage("Failed to delete task! - " + error.message);
-  //     });
-
-
-  // Handling Delete Task with State Update
 const handleDeleteTask = (id) => {
   deleteTask(id)
     .then(response => {
       if (response.status === 200 || response.status === 204) {
         console.log("Task Deleted");
         // Remove task from local state
-        setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
+        setTasks(prevTasks => prevTasks.filter(task => task.id !== id)); // Unmatched id(todo list) remains and vice-versa
       } else {
         setErrorMessage(`Error! - ${response.statusText}`);
       }
@@ -104,53 +88,39 @@ const handleDeleteTask = (id) => {
 }
 
 
-  // -----------------------------Practice backend------------------
+//Mark as complete or incomplete
+const toggle = (id) => {
 
+  //Store the task that matches the provided id
+  const updatedTask = tasks.find(task => task.id === id);
+  
+  if (updatedTask) {
+    // Task remains same but the completed status change (If it was true (completed), it becomes false, and vice versa.[Backend])
+    const updatedStatus = { ...updatedTask, completed: !updatedTask.completed };
 
-  //Add
-  // const add = () => {
-  //   const inputText = inputRef.current.value.trim();
+    // Send the updated status to the server
+    sendTask(updatedStatus).then(response => {
+      if (response.status === 200) {
+        console.log("Task status updated");
 
-  //   if(inputText === ""){
-  //     return null;
-  //   }
-
-  //   const newTodo = {
-  //     id : Date.now(),
-  //     text : inputText,
-  //     isComplete : false
-  //   }
-
-  //   setTodoList((prev) => [...prev, newTodo]);
-  //   inputRef.current.value = "";
-  // }
-
-
-  // Delete
-  // const deleteTodo = (id)=> {
-  //     setTodoList((prevTodos) => {
-  //      return prevTodos.filter((todo) => todo.id !== id ) // Unmatched id(todo list) remains and vice-versa
-  //     })
-  // }
-
-// Complete or not complete
-  const toggle = (id) =>{
-    setTodoList((prevTodos)=> {
-        return prevTodos.map((todo)=> {
-          if(todo.id === id){
-            return {...todo, isComplete : !todo.isComplete}
-          }
-          return todo;
-        })
-    })
+        // Update the tasks state in the frontend
+        //If the provided id matches it return updated task else it return original task[Frontend]
+        setTasks(prevTasks =>
+          prevTasks.map(task => (task.id === id ? updatedStatus : task))  
+        );
+      } else {
+        setErrorMessage("Error updating task status: " + response.statusText);
+      }
+    }).catch(error => {
+      setErrorMessage("Failed to update task status! - " + error.message);
+    });
   }
+};
 
 
-  // useEffect(()=>{
-  //   localStorage.setItem("todos", JSON.stringify(todoList)); // key, converting array into string
-  // },[todoList])
 
 
+  // -----------------------------Practice backend------------------
 
 
   return (
@@ -196,4 +166,4 @@ const handleDeleteTask = (id) => {
   )
 }
 
-export default Todo
+export default Todo;
