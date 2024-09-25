@@ -43,6 +43,12 @@ public class TaskController {
         return ResponseEntity.ok(true);
     }
 
+    @PutMapping({"/{id}"})
+    public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task task){
+        task.setId(id);
+        return ResponseEntity.ok(taskService.updateTask(task));
+    }
+
 
 
 
