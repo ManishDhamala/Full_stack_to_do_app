@@ -17,7 +17,7 @@ export const sendTask = (task) => {
     return axios({
         url: "http://localhost:8080/api/v1/tasks/",
         method: "POST",
-        headers: new Headers({ 'Accept': 'application/json', 'ContentType': 'application/json' }),
+        headers: new Headers({ 'Accept': 'application/json', 'Content-Type': 'application/json' }),
         data: task
     });
 }
@@ -26,5 +26,19 @@ export const sendTask = (task) => {
 export const deleteTask = (id) => {
     return axios.delete(`http://localhost:8080/api/v1/tasks/${id}`, {
         headers: { 'Accept': 'application/json' }
+    });
+}
+
+
+// Updating Task of the server
+export const UpdateTask = (id, task) => {
+    return axios({
+        url: `http://localhost:8080/api/v1/tasks/${id}`,
+        method: "PUT",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        data: task
     });
 }

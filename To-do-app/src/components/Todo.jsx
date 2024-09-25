@@ -2,7 +2,7 @@ import React, { useReducer, useRef, useState } from 'react'
 import todo_icon from '../assets/todo_icon.png'
 import TodoItems from './TodoItems'
 import { useEffect } from 'react';
-import { deleteTask, getAllTasks, sendTask } from '../restful-api/DataFunction';
+import { deleteTask, getAllTasks, sendTask, UpdateTask } from '../restful-api/DataFunction';
 
 const Todo = () => {
 
@@ -98,8 +98,8 @@ const toggle = (id) => {
     // Task remains same but the completed status change (If it was true (completed), it becomes false, and vice versa.[Backend])
     const updatedStatus = { ...updatedTask, completed: !updatedTask.completed };
 
-    // Send the updated status to the server
-    sendTask(updatedStatus).then(response => {
+    // Update the task based on id
+    UpdateTask(id,updatedStatus).then(response => {
       if (response.status === 200) {
         console.log("Task status updated");
 
@@ -116,6 +116,35 @@ const toggle = (id) => {
     });
   }
 };
+
+
+//Edit the already added Tasks
+
+  const editTask = (id,newTaskText) =>{
+
+    const updatedTask = tasks.find(task=> task.id === id);
+
+    if(updatedTask){
+      const updatedStatus = {...updatedTask, task: newTaskText};
+    
+
+    UpdateTask(id,updatedStatus).then(response =>{
+      if(response.status === 200){
+        console.log("Task edited successfully");
+      
+        setTasks(prevTasks => {
+          prevTasks.map(task => (task.id === id ? updatedStatus : task))
+        });
+
+    }else{
+      setErrorMessage("Error editing task status: " + response.statusText);
+    }
+      }).catch(error => {
+    setErrorMessage("Failed to edit task status! - " + error.message);
+    });
+  }
+ }
+  
 
 
 
@@ -156,7 +185,10 @@ const toggle = (id) => {
            text={item.task}
            id={item.id} 
            isComplete={item.completed}
-           deleteTask={() => handleDeleteTask(item.id)} toggle={toggle}/>
+           deleteTask={() => handleDeleteTask(item.id)}
+           toggle={toggle}
+           editTask={editTask}
+           />
         } )}
 
       </div>
