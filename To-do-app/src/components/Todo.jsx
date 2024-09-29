@@ -1,4 +1,4 @@
-import React, { useReducer, useRef, useState } from "react";
+import React, { useCallback, useReducer, useRef, useState } from "react";
 import todo_icon from "../assets/todo_icon.png";
 import TodoItems from "./TodoItems";
 import { useEffect } from "react";
@@ -17,6 +17,13 @@ const Todo = () => {
   const [tasks, setTasks] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const inputRef = useRef(null);
+
+  //Handling error
+  const handleError = (error) => {
+    setErrorMessage(`Error! - ${error.message || error.statusText}`); //error == response
+  };
+
   useEffect(() => {
     const taskPromise = getAllTasks();
     taskPromise
@@ -29,131 +36,168 @@ const Todo = () => {
 
           setTasks(sortedTasks);
         } else {
-          setErrorMessage("Error! - " + response.statusText);
+          //setErrorMessage("Error! - " + response.statusText);
+          handleError(response); //Code reusability and optimization
         }
       })
-      .catch((response) => {
-        console.log("Something went wrong");
-        setErrorMessage("Error! - " + response);
-      });
+      .catch(handleError); //Code reusability and optimization
+
+    // .catch((response) => {
+    //   console.log("Something went wrong");
+    //   setErrorMessage("Error! - " + response);
+    // });
   }, []);
 
   // Sending the data to the server
 
-  const initialState = { task: "", completed: false };
-
-  const newTaskReducer = (state, data) => {
-    return { ...state, [data.field]: data.value };
-  };
-
-  const [newTask, dispatch] = useReducer(newTaskReducer, initialState);
-
-  const handleOnChange = (e) => {
-    dispatch({ field: e.target.id, value: e.target.value });
-  };
-
-  console.log(newTask);
-
+  // --------------(Uncontrolled Input)---------------
   const save = (e) => {
     e.preventDefault();
-    const sendTaskPromise = sendTask(newTask);
-    sendTaskPromise.then((response) => {
-      if (response.status === 200) {
-        console.log("New Task added");
 
-        // Assuming the response contains the task with its assigned ID from the backend
-        const addedTask = response.data;
+    const taskText = inputRef.current.value.trim(); // Get value from the input field and remove front whitespace
+    if (taskText.trim() === "") return; // Avoid submitting empty tasks
 
-        // Update the tasks state with the newly added task
-        setTasks((prevTasks) => [...prevTasks, addedTask]);
+    const newTask = { task: taskText, completed: false };
 
-        // Reset the newTask state to clear the input field
-        dispatch({ field: "task", value: "" });
-      } else {
-        setErrorMessage("Something went wrong" + response.statusText);
-      }
-    });
-  };
-
-  //Deleting the data from the server
-  const handleDeleteTask = (id) => {
-    deleteTask(id)
+    sendTask(newTask)
       .then((response) => {
-        if (response.status === 200 || response.status === 204) {
-          console.log("Task Deleted");
-          // Remove task from local state
-          setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id)); // Unmatched id(todo list) remains and vice-versa
+        if (response.status === 200) {
+          console.log("New Task added");
+          const addedTask = response.data;
+
+          // Update the tasks state with the newly added task
+          setTasks((prevTasks) => [...prevTasks, addedTask]);
+
+          // Clear the input field
+          inputRef.current.value = "";
         } else {
-          setErrorMessage(`Error! - ${response.statusText}`);
+          setErrorMessage(response);
         }
       })
-      .catch((error) => {
-        setErrorMessage(`Failed to delete task! - ${error.message}`);
-      });
+      .catch(handleError);
   };
 
-  //Mark as complete or incomplete
-  const toggle = (id) => {
-    //Store the task that matches the provided id
-    const updatedTask = tasks.find((task) => task.id === id);
+  // --------------(Uncontrolled Input)---------------
 
-    if (updatedTask) {
-      // Task remains same but the completed status change (If it was true (completed), it becomes false, and vice versa.[Backend])
-      const updatedStatus = {
-        ...updatedTask,
-        completed: !updatedTask.completed,
-      };
+  // --------------(Controlled Input)---------------
 
-      // Update the task based on id
-      UpdateTask(id, updatedStatus)
+  // const initialState = { task: "", completed: false };
+
+  // const newTaskReducer = (state, data) => {
+  //   return { ...state, [data.field]: data.value };
+  // };
+
+  // const [newTask, dispatch] = useReducer(newTaskReducer, initialState);
+
+  // const handleOnChange = (e) => {
+  //   dispatch({ field: e.target.id, value: e.target.value });
+  // };
+
+  // console.log(newTask);
+
+  // const save = (e) => {
+  //   e.preventDefault();
+  //   const sendTaskPromise = sendTask(newTask);
+  //   sendTaskPromise
+  //     .then((response) => {
+  //       if (response.status === 200) {
+  //         console.log("New Task added");
+
+  //         // Assuming the response contains the task with its assigned ID from the backend
+  //         const addedTask = response.data;
+
+  //         // Update the tasks state with the newly added task
+  //         setTasks((prevTasks) => [...prevTasks, addedTask]);
+
+  //         // Reset the newTask state to clear the input field
+  //         dispatch({ field: "task", value: "" });
+  //       } else {
+  //         handleError(response);
+  //       }
+  //     })
+  //     .catch(handleError);
+  // };
+
+  // --------------(Controlled Input)---------------
+
+  //Deleting the data from the server
+  const handleDeleteTask = useCallback(
+    (id) => {
+      deleteTask(id)
         .then((response) => {
-          if (response.status === 200) {
-            console.log("Task status updated");
-
-            // Update the tasks state in the frontend
-            //If the provided id matches it return updated task else it return original task[Frontend]
-            setTasks((prevTasks) =>
-              prevTasks.map((task) => (task.id === id ? updatedStatus : task))
-            );
+          if (response.status === 200 || response.status === 204) {
+            console.log("Task Deleted");
+            // Remove task from local state
+            setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id)); // Unmatched id(todo list) remains and vice-versa
           } else {
-            setErrorMessage(
-              "Error updating task status: " + response.statusText
-            );
+            handleError(response);
           }
         })
-        .catch((error) => {
-          setErrorMessage("Failed to update task status! - " + error.message);
-        });
-    }
-  };
+        .catch(handleError);
+    },
+    [tasks]
+  );
+
+  //Mark as complete or incomplete
+  const toggle = useCallback(
+    (id) => {
+      //Store the task that matches the provided id
+      const updatedTask = tasks.find((task) => task.id === id);
+
+      if (updatedTask) {
+        // Task remains same but the completed status change (If it was true (completed), it becomes false, and vice versa.[Backend])
+        const updatedStatus = {
+          ...updatedTask,
+          completed: !updatedTask.completed,
+        };
+
+        // Update the task based on id
+        UpdateTask(id, updatedStatus)
+          .then((response) => {
+            if (response.status === 200) {
+              console.log("Task status updated");
+
+              // Update the tasks state in the frontend
+              //If the provided id matches it return updated task else it return original task[Frontend]
+              setTasks((prevTasks) =>
+                prevTasks.map((task) => (task.id === id ? updatedStatus : task))
+              );
+            } else {
+              handleError(response);
+            }
+          })
+          .catch(handleError);
+      }
+    },
+    [tasks]
+  );
 
   //Edit the already added Tasks
 
-  const editTask = (id, newTaskText) => {
-    const updatedTask = tasks.find((task) => task.id === id);
+  const editTask = useCallback(
+    (id, newTaskText) => {
+      const updatedTask = tasks.find((task) => task.id === id);
 
-    if (updatedTask) {
-      const updatedStatus = { ...updatedTask, task: newTaskText };
+      if (updatedTask) {
+        const updatedStatus = { ...updatedTask, task: newTaskText };
 
-      UpdateTask(id, updatedStatus)
-        .then((response) => {
-          if (response.status === 200) {
-            console.log("Task edited successfully");
+        UpdateTask(id, updatedStatus)
+          .then((response) => {
+            if (response.status === 200) {
+              console.log("Task edited successfully");
 
-            setTasks((prevTasks) =>
-              prevTasks.map((task) => (task.id === id ? updatedStatus : task))
-            );
-          } else {
-            setErrorMessage(
-              "Error editing task status: " + response.statusText
-            );
-          }
-        })
-        .catch((error) => {
-          setErrorMessage("Failed to edit task status! - " + error.message);
-        });
-    }
-  };
+              setTasks((prevTasks) =>
+                prevTasks.map((task) => (task.id === id ? updatedStatus : task))
+              );
+            } else {
+              handleError(response);
+            }
+          })
+          .catch(handleError);
+      }
+    },
+    [tasks]
+  );
 
   // -----------------------------Practice backend------------------
 
@@ -178,9 +222,10 @@ const Todo = () => {
         pl-6 pr-2 placeholder:text-slate-600"
           type="text"
           placeholder="Add your task"
+          ref={inputRef}
           id="task"
-          value={newTask.task}
-          onChange={handleOnChange}
+          // value={newTask.task}
+          // onChange={handleOnChange}
         />
         <button
           onClick={save}
