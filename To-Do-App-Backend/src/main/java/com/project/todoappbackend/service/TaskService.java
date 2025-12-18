@@ -2,38 +2,46 @@ package com.project.todoappbackend.service;
 
 import com.project.todoappbackend.model.Task;
 import com.project.todoappbackend.repository.TaskRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class TaskService {
 
-    @Autowired
-    private TaskRepository taskRepository;
+    private final TaskRepository taskRepository;
 
-    public Task createNewTask(Task task){
+    public Task createNewTask(Task task) {
+        log.info("Task Created");
         return taskRepository.save(task);
     }
 
-    public Task updateTask(Task task){
+    public Task updateTask(Task task) {
+        log.info("Task updated");
         return taskRepository.save(task);
     }
 
-    public List<Task> getAllTask(){
+    public List<Task> getAllTask() {
+        log.info("Fetched All Tasks");
         return taskRepository.findAll();
     }
 
-    public List<Task> findAllCompletedTasks(){
+    public List<Task> findAllCompletedTasks() {
+        log.info("Fetched All Completed Tasks");
         return taskRepository.findByCompletedTrue();
     }
 
-    public List<Task> findAllUncompletedTasks(){
+    public List<Task> findAllUncompletedTasks() {
+        log.info("Fetched All Uncompleted Tasks");
         return taskRepository.findByCompletedFalse();
     }
 
-    public void deleteTask(Long id){
+    public void deleteTask(Long id) {
+        log.info("Task Deleted");
         taskRepository.deleteById(id);
     }
 
