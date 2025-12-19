@@ -1,5 +1,6 @@
 package com.project.todoappbackend.controller;
 
+import com.project.todoappbackend.dto.TaskDto;
 import com.project.todoappbackend.model.Task;
 import com.project.todoappbackend.service.TaskService;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +35,9 @@ public class TaskController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Task> createTask(@RequestBody Task task) {
-        return ResponseEntity.ok(taskService.createNewTask(task));
+    public ResponseEntity<TaskDto> createTask(@RequestBody TaskDto taskDto) {
+        TaskDto savedTask = taskService.createNewTask(taskDto);
+        return ResponseEntity.ok(savedTask);
     }
 
     @DeleteMapping("/{id}")

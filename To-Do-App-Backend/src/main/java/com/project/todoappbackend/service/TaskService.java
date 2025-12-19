@@ -1,5 +1,7 @@
 package com.project.todoappbackend.service;
 
+import com.project.todoappbackend.dto.TaskDto;
+import com.project.todoappbackend.mapper.TaskManualMapper;
 import com.project.todoappbackend.model.Task;
 import com.project.todoappbackend.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +16,16 @@ import java.util.List;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final TaskManualMapper taskManualMapper;
 
-    public Task createNewTask(Task task) {
+    public TaskDto createNewTask(TaskDto taskDto) {
+        // Dto -> Entity
+        Task task = taskManualMapper.toEntity(taskDto);
+        // Save task(Entity) in the database
+        Task savedTask = taskRepository.save(task);
         log.info("Task Created");
-        return taskRepository.save(task);
+        // Entity -> Dto
+        return taskManualMapper.toDto(savedTask);
     }
 
     public Task updateTask(Task task) {
