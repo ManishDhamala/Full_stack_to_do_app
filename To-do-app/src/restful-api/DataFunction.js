@@ -6,7 +6,7 @@ export const getAllTasks = () => {
     const taskPromise = axios({
         url: "http://localhost:8080/api/v1/tasks/",
         method: "GET",
-        headers: new Headers({ 'Accept': 'application/json' })
+        headers: new Headers({ 'Accept': 'application/json' })  // The client expects a JSON response from the server.
     });
 
     return taskPromise;
@@ -17,7 +17,10 @@ export const sendTask = (task) => {
     return axios({
         url: "http://localhost:8080/api/v1/tasks/",
         method: "POST",
-        headers: new Headers({ 'Accept': 'application/json', 'Content-Type': 'application/json' }),
+        headers: new Headers({
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'    // The client is sending data in JSON format.
+        }),
         data: task
     });
 }

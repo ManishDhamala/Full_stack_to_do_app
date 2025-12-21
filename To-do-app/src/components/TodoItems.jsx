@@ -14,7 +14,7 @@ const TodoItems = React.memo(
     };
 
     const handleSaveClick = () => {
-      editTask(id, editedText); // Call editTask with the updated task text
+      editTask(id, editedText); // Call editTask function with the updated task text
       setIsEditing(false); // Exit editing mode
     };
 
@@ -40,8 +40,8 @@ const TodoItems = React.memo(
             // Show input field in edit mode
             <input
               className="ml-4 text-[17px] border border-gray-400 p-1"
-              value={editedText}
-              onChange={(e) => setEditedText(e.target.value)} // Update editedText state
+              value={editedText} //Original Task text
+              onChange={(e) => setEditedText(e.target.value)} // Update editedText(stateful variable) state
             />
           ) : (
             // Show task text in view mode

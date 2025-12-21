@@ -31,10 +31,10 @@ const Todo = () => {
         if (response.status == 200) {
           console.log("Got the data");
 
-          // Sorting tasks by id before setting state
-          const sortedTasks = response.data.sort((a, b) => a.id - b.id);
+          // Sorting tasks by their id values in asacending order
+          const Tasks = response.data;
 
-          setTasks(sortedTasks);
+          setTasks(Tasks);
         } else {
           //setErrorMessage("Error! - " + response.statusText);
           handleError(response); //Code reusability and optimization
@@ -52,9 +52,10 @@ const Todo = () => {
 
   // --------------(Uncontrolled Input)---------------
   const save = (e) => {
-    e.preventDefault();
+    e.preventDefault(); //Prevents form submission (NOT use)
 
-    const taskText = inputRef.current.value.trim(); // Get value from the input field and remove front whitespace
+    const taskText = inputRef.current.value.trim(); //Get value from the input field and remove front whitespace
+
     if (taskText.trim() === "") return; // Avoid submitting empty tasks
 
     const newTask = { task: taskText, completed: false };
@@ -66,7 +67,7 @@ const Todo = () => {
           const addedTask = response.data;
 
           // Update the tasks state with the newly added task
-          setTasks((prevTasks) => [...prevTasks, addedTask]);
+          setTasks((prevTasks) => [addedTask, ...prevTasks]);
 
           // Clear the input field
           inputRef.current.value = "";
@@ -79,55 +80,15 @@ const Todo = () => {
 
   // --------------(Uncontrolled Input)---------------
 
-  // --------------(Controlled Input)---------------
-
-  // const initialState = { task: "", completed: false };
-
-  // const newTaskReducer = (state, data) => {
-  //   return { ...state, [data.field]: data.value };
-  // };
-
-  // const [newTask, dispatch] = useReducer(newTaskReducer, initialState);
-
-  // const handleOnChange = (e) => {
-  //   dispatch({ field: e.target.id, value: e.target.value });
-  // };
-
-  // console.log(newTask);
-
-  // const save = (e) => {
-  //   e.preventDefault();
-  //   const sendTaskPromise = sendTask(newTask);
-  //   sendTaskPromise
-  //     .then((response) => {
-  //       if (response.status === 200) {
-  //         console.log("New Task added");
-
-  //         // Assuming the response contains the task with its assigned ID from the backend
-  //         const addedTask = response.data;
-
-  //         // Update the tasks state with the newly added task
-  //         setTasks((prevTasks) => [...prevTasks, addedTask]);
-
-  //         // Reset the newTask state to clear the input field
-  //         dispatch({ field: "task", value: "" });
-  //       } else {
-  //         handleError(response);
-  //       }
-  //     })
-  //     .catch(handleError);
-  // };
-
-  // --------------(Controlled Input)---------------
-
   //Deleting the data from the server
   const handleDeleteTask = useCallback(
     (id) => {
-      deleteTask(id)
+      deleteTask(id) // Remove task from backend
         .then((response) => {
           if (response.status === 200 || response.status === 204) {
             console.log("Task Deleted");
-            // Remove task from local state
+
+            // Remove task from local state(Front-end)
             setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id)); // Unmatched id(todo list) remains and vice-versa
           } else {
             handleError(response);
@@ -145,13 +106,13 @@ const Todo = () => {
       const updatedTask = tasks.find((task) => task.id === id);
 
       if (updatedTask) {
-        // Task remains same but the completed status change (If it was true (completed), it becomes false, and vice versa.[Backend])
+        // Task remains same but the completed status change (If it was true (completed), it becomes false, and vice versa.)
         const updatedStatus = {
           ...updatedTask,
           completed: !updatedTask.completed,
         };
 
-        // Update the task based on id
+        // Update the task based on id [Backend]
         UpdateTask(id, updatedStatus)
           .then((response) => {
             if (response.status === 200) {
@@ -241,6 +202,7 @@ const Todo = () => {
 
       <div>
         {tasks.map((item, index) => {
+          // item = task & index = 0,1,2...
           return (
             <TodoItems
               key={index}
