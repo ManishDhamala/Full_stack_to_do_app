@@ -1,6 +1,7 @@
 package com.project.todoappbackend.controller;
 
 import com.project.todoappbackend.dto.TaskDto;
+import com.project.todoappbackend.mapper.TaskManualMapper;
 import com.project.todoappbackend.model.Task;
 import com.project.todoappbackend.service.TaskService;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +36,8 @@ public class TaskController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<TaskDto> createTask(@RequestBody TaskDto taskDto) {
-        TaskDto savedTask = taskService.createNewTask(taskDto);
+    public ResponseEntity<Task> createTask(@RequestBody Task task) {
+        Task savedTask = taskService.createNewTask(task);
         return ResponseEntity.ok(savedTask);
     }
 
@@ -47,9 +48,9 @@ public class TaskController {
     }
 
     @PutMapping({"/{id}"})
-    public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task task) {
-        task.setId(id);
-        return ResponseEntity.ok(taskService.updateTask(task));
+    public ResponseEntity<TaskDto> updateTask(@PathVariable Long id, @RequestBody TaskDto taskDto) {
+        TaskDto updatedTask = taskService.updateTask(id, taskDto);
+        return ResponseEntity.ok(updatedTask);
     }
 
 
