@@ -10,14 +10,14 @@ public class TaskManualMapper {
     public TaskDto toDto(Task task) {
         TaskDto dto = new TaskDto();
         dto.setTask(task.getTask());
-        dto.setCompleted(task.isCompleted());
+        dto.setCompleted(task.getCompleted());
         return dto;
     }
 
     public Task toEntity(TaskDto taskDto) {
         Task task = new Task();
         task.setTask(taskDto.getTask());
-        task.setCompleted(taskDto.isCompleted());
+        task.setCompleted(taskDto.getCompleted());
         return task;
     }
 

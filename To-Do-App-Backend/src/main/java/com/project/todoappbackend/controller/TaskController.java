@@ -21,23 +21,23 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping("/")
-    public ResponseEntity<List<Task>> getAllTasks() {
-        return ResponseEntity.ok(taskService.getAllTask());
+    public ResponseEntity<List<TaskDto>> getAllTasks() {
+        return ResponseEntity.ok(taskService.getAllTasks());
     }
 
     @GetMapping("/completed")
-    public ResponseEntity<List<Task>> getCompletedTask() {
+    public ResponseEntity<List<TaskDto>> getCompletedTask() {
         return ResponseEntity.ok(taskService.findAllCompletedTasks());
     }
 
     @GetMapping("/uncompleted")
-    public ResponseEntity<List<Task>> getUncompletedTask() {
+    public ResponseEntity<List<TaskDto>> getUncompletedTask() {
         return ResponseEntity.ok(taskService.findAllUncompletedTasks());
     }
 
     @PostMapping("/")
-    public ResponseEntity<Task> createTask(@RequestBody Task task) {
-        Task savedTask = taskService.createNewTask(task);
+    public ResponseEntity<TaskDto> createTask(@RequestBody TaskDto taskDto) {
+        TaskDto savedTask = taskService.createNewTask(taskDto);
         return ResponseEntity.ok(savedTask);
     }
 
@@ -47,9 +47,9 @@ public class TaskController {
         return ResponseEntity.ok(true);
     }
 
-    @PutMapping({"/{id}"})
-    public ResponseEntity<TaskDto> updateTask(@PathVariable Long id, @RequestBody TaskDto taskDto) {
-        TaskDto updatedTask = taskService.updateTask(id, taskDto);
+    @PutMapping({"/"})
+    public ResponseEntity<TaskDto> updateTask(@RequestBody TaskDto taskDto) {
+        TaskDto updatedTask = taskService.updateTask(taskDto);
         return ResponseEntity.ok(updatedTask);
     }
 

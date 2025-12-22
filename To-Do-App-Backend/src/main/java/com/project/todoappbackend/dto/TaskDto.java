@@ -11,7 +11,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class TaskDto {
 
+    private Long id;
     private String task;
-    private boolean completed;
+    private Boolean completed;
 
 }

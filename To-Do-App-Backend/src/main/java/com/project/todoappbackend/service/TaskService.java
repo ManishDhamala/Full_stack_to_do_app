@@ -1,7 +1,6 @@
 package com.project.todoappbackend.service;
 
 import com.project.todoappbackend.dto.TaskDto;
-import com.project.todoappbackend.mapper.TaskManualMapper;
 import com.project.todoappbackend.mapper.TaskMapper;
 import com.project.todoappbackend.model.Task;
 import com.project.todoappbackend.repository.TaskRepository;
@@ -12,7 +11,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -20,43 +18,54 @@ import java.util.stream.Collectors;
 public class TaskService {
 
     private final TaskRepository taskRepository;
-    private final TaskManualMapper taskManualMapper;
-//  private final TaskMapper taskMapper;
+    private final TaskMapper taskMapper;
 
-    public Task createNewTask(Task task) {
+    public TaskDto createNewTask(TaskDto taskDto) {
+
+        Task task = taskMapper.toEntity(taskDto);
         Task savedTask = taskRepository.save(task);
         log.info("Task Created");
-        return savedTask;
+
+        return taskMapper.toDTO(savedTask);
     }
 
-    public TaskDto updateTask(Long id, TaskDto taskDto) {
-
-        Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("No task found"));
-
+    public TaskDto updateTask(TaskDto taskDto) {
+        Task task = taskRepository.findById(taskDto.getId()).orElseThrow(() -> new RuntimeException("No task found"));
         task.setTask(taskDto.getTask());
-        task.setCompleted(taskDto.isCompleted());
-
+        task.setCompleted(taskDto.getCompleted());
         Task updatedTask = taskRepository.save(task);
+
         log.info("Task Updated");
-        return taskManualMapper.toDto(updatedTask);
+        return taskMapper.toDTO(updatedTask);
     }
 
-    public List<Task> getAllTask() {
-        List<Task> tasks = taskRepository.findAll(
-                Sort.by(Sort.Direction.DESC, "id")  // Sorting task on desc order based on id
-        );
-        log.info("Fetched All Tasks");
+    public List<TaskDto> getAllTasks() {
+        List<TaskDto> tasks = taskRepository.findAll(
+                        Sort.by(Sort.Direction.DESC, "id") // Sorting task on desc order based on id
+                ).stream()
+                .map(task -> taskMapper.toDTO(task))
+                .toList();
+        log.info("Fetched All tasks");
         return tasks;
     }
 
-    public List<Task> findAllCompletedTasks() {
+    public List<TaskDto> findAllCompletedTasks() {
+        List<TaskDto> completedTasks = taskRepository.findByCompletedTrue()
+                .stream()
+                .map(task -> taskMapper.toDTO(task))
+                .toList();
         log.info("Fetched All Completed Tasks");
-        return taskRepository.findByCompletedTrue();
+        return completedTasks;
     }
 
-    public List<Task> findAllUncompletedTasks() {
-        log.info("Fetched All Uncompleted Tasks");
-        return taskRepository.findByCompletedFalse();
+    public List<TaskDto> findAllUncompletedTasks() {
+        List<TaskDto> uncompletedTasks = taskRepository.findByCompletedFalse()
+                .stream()
+                .map(task -> taskMapper.toDTO(task))
+                .toList();
+        log.info("Fetched All UnCompleted Tasks");
+        return uncompletedTasks;
+
     }
 
     public void deleteTask(Long id) {
