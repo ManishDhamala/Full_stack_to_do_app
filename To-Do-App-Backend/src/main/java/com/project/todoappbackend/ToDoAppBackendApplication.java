@@ -5,8 +5,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 public class ToDoAppBackendApplication {
 
     public static void main(String[] args) {
@@ -18,10 +20,11 @@ public class ToDoAppBackendApplication {
     }
 
     @Bean
-    public FilterRegistrationBean<RateLimitingFilter> rateLimitingFilterFilter() {
+    public FilterRegistrationBean<RateLimitingFilter> rateLimitingFilterFilter( RateLimitingFilter rateLimitingFilter) {
         FilterRegistrationBean<RateLimitingFilter> registration = new FilterRegistrationBean<>();
-        registration.setFilter(new RateLimitingFilter());
+        registration.setFilter(rateLimitingFilter);
         registration.addUrlPatterns("/api/*");
+        registration.setOrder(1);  // Order for filters, 1 means this filters run first
         return registration;
     }
 
