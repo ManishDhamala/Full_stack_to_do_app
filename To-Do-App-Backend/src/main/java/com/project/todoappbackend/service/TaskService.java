@@ -24,7 +24,7 @@ public class TaskService {
 
         Task task = taskMapper.toEntity(taskDto);
         Task savedTask = taskRepository.save(task);
-        log.info("Task Created");
+       // log.info("Task Created");
 
         return taskMapper.toDTO(savedTask);
     }
@@ -35,7 +35,7 @@ public class TaskService {
         task.setCompleted(taskDto.getCompleted());
         Task updatedTask = taskRepository.save(task);
 
-        log.info("Task Updated");
+     //   log.info("Task Updated");
         return taskMapper.toDTO(updatedTask);
     }
 
@@ -45,7 +45,7 @@ public class TaskService {
                 ).stream()
                 .map(task -> taskMapper.toDTO(task))
                 .toList();
-        log.info("Fetched All tasks");
+      //  log.info("Fetched All tasks");
         return tasks;
     }
 
@@ -54,7 +54,7 @@ public class TaskService {
                 .stream()
                 .map(task -> taskMapper.toDTO(task))
                 .toList();
-        log.info("Fetched All Completed Tasks");
+     //   log.info("Fetched All Completed Tasks");
         return completedTasks;
     }
 
@@ -63,7 +63,7 @@ public class TaskService {
                 .stream()
                 .map(task -> taskMapper.toDTO(task))
                 .toList();
-        log.info("Fetched All UnCompleted Tasks");
+      //  log.info("Fetched All UnCompleted Tasks");
         return uncompletedTasks;
 
     }
@@ -75,7 +75,7 @@ public class TaskService {
         }
 
         taskRepository.deleteById(id);
-        log.info("Task Deleted");
+      //  log.info("Task Deleted");
     }
 
 

@@ -24,7 +24,7 @@ public class ToDoAppBackendApplication {
         FilterRegistrationBean<RateLimitingFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(rateLimitingFilter);
         registration.addUrlPatterns("/api/*");
-        registration.setOrder(1);  // Order for filters, 1 means this filters run first
+        registration.setOrder(1);  // 1 order means this filters run first before any other filters
         return registration;
     }
 
