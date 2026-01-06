@@ -7,6 +7,7 @@ import com.project.todoappbackend.repository.TaskRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +50,7 @@ public class TaskService {
         return tasks;
     }
 
+    @Cacheable("CompletedTasks")
     public List<TaskDto> findAllCompletedTasks() {
         List<TaskDto> completedTasks = taskRepository.findByCompletedTrue()
                 .stream()
