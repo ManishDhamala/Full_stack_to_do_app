@@ -7,11 +7,13 @@ import com.project.todoappbackend.repository.TaskRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -25,18 +27,19 @@ public class TaskService {
 
         Task task = taskMapper.toEntity(taskDto);
         Task savedTask = taskRepository.save(task);
-       // log.info("Task Created");
+        // log.info("Task Created");
 
         return taskMapper.toDTO(savedTask);
     }
 
+    @CacheEvict(value = "completedTasks", allEntries = true)
     public TaskDto updateTask(TaskDto taskDto) {
         Task task = taskRepository.findById(taskDto.getId()).orElseThrow(() -> new RuntimeException("No task found"));
         task.setTask(taskDto.getTask());
         task.setCompleted(taskDto.getCompleted());
         Task updatedTask = taskRepository.save(task);
 
-     //   log.info("Task Updated");
+        //   log.info("Task Updated");
         return taskMapper.toDTO(updatedTask);
     }
 
@@ -46,26 +49,27 @@ public class TaskService {
                 ).stream()
                 .map(task -> taskMapper.toDTO(task))
                 .toList();
-      //  log.info("Fetched All tasks");
+        //  log.info("Fetched All tasks");
         return tasks;
     }
 
-    @Cacheable("CompletedTasks")
+    @Cacheable("completedTasks")
     public List<TaskDto> findAllCompletedTasks() {
         List<TaskDto> completedTasks = taskRepository.findByCompletedTrue()
                 .stream()
                 .map(task -> taskMapper.toDTO(task))
-                .toList();
-     //   log.info("Fetched All Completed Tasks");
+                .collect(Collectors.toList());
+        //   log.info("Fetched All Completed Tasks");
         return completedTasks;
     }
+
 
     public List<TaskDto> findAllUncompletedTasks() {
         List<TaskDto> uncompletedTasks = taskRepository.findByCompletedFalse()
                 .stream()
                 .map(task -> taskMapper.toDTO(task))
                 .toList();
-      //  log.info("Fetched All UnCompleted Tasks");
+        //  log.info("Fetched All UnCompleted Tasks");
         return uncompletedTasks;
 
     }
@@ -77,7 +81,7 @@ public class TaskService {
         }
 
         taskRepository.deleteById(id);
-      //  log.info("Task Deleted");
+        //  log.info("Task Deleted");
     }
 
 
