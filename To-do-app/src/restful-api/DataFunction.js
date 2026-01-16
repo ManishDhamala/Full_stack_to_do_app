@@ -34,9 +34,9 @@ export const deleteTask = (id) => {
 
 
 // Updating Task of the server
-export const UpdateTask = (id, task) => {
+export const UpdateTask = (task) => {
     return axios({
-        url: `http://localhost:8080/api/v1/tasks/${id}`,
+        url: `http://localhost:8080/api/v1/tasks/`,
         method: "PUT",
         headers: {
             'Accept': 'application/json',

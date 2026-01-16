@@ -36,21 +36,13 @@ const Todo = () => {
 
           setTasks(Tasks);
         } else {
-          //setErrorMessage("Error! - " + response.statusText);
           handleError(response); //Code reusability and optimization
         }
       })
       .catch(handleError); //Code reusability and optimization
-
-    // .catch((response) => {
-    //   console.log("Something went wrong");
-    //   setErrorMessage("Error! - " + response);
-    // });
   }, []);
 
   // Sending the data to the server
-
-  // --------------(Uncontrolled Input)---------------
   const save = (e) => {
     e.preventDefault(); //Prevents form submission (NOT use)
 
@@ -62,7 +54,7 @@ const Todo = () => {
 
     sendTask(newTask)
       .then((response) => {
-        if (response.status === 200) {
+        if (response.status === 200 || response.status === 201) {
           console.log("New Task added");
           const addedTask = response.data;
 
@@ -72,13 +64,11 @@ const Todo = () => {
           // Clear the input field
           inputRef.current.value = "";
         } else {
-          setErrorMessage(response);
+          handleError(response);
         }
       })
       .catch(handleError);
   };
-
-  // --------------(Uncontrolled Input)---------------
 
   //Deleting the data from the server
   const handleDeleteTask = useCallback(
@@ -112,14 +102,14 @@ const Todo = () => {
           completed: !updatedTask.completed,
         };
 
-        // Update the task based on id [Backend]
-        UpdateTask(id, updatedStatus)
+        // Update the task
+        UpdateTask(updatedStatus)
           .then((response) => {
             if (response.status === 200) {
               console.log("Task status updated");
 
               // Update the tasks state in the frontend
-              //If the provided id matches it return updated task else it return original task[Frontend]
+              //If the provided id matches it return updated task else it return original task
               setTasks((prevTasks) =>
                 prevTasks.map((task) => (task.id === id ? updatedStatus : task))
               );
@@ -134,7 +124,6 @@ const Todo = () => {
   );
 
   //Edit the already added Tasks
-
   const editTask = useCallback(
     (id, newTaskText) => {
       const updatedTask = tasks.find((task) => task.id === id);
@@ -142,7 +131,7 @@ const Todo = () => {
       if (updatedTask) {
         const updatedStatus = { ...updatedTask, task: newTaskText };
 
-        UpdateTask(id, updatedStatus)
+        UpdateTask(updatedStatus)
           .then((response) => {
             if (response.status === 200) {
               console.log("Task edited successfully");
@@ -201,11 +190,11 @@ const Todo = () => {
       {/* ------------------------todo list--------------------------- */}
 
       <div>
-        {tasks.map((item, index) => {
+        {tasks.map((item) => {
           // item = task & index = 0,1,2...
           return (
             <TodoItems
-              key={index}
+              key={item.id}
               text={item.task}
               id={item.id}
               isComplete={item.completed}
