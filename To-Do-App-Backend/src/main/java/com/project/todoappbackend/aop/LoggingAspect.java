@@ -27,14 +27,21 @@ public class LoggingAspect {
 //        log.info("Method executed "+jp.getSignature().getName());
 //    }
 
-    @AfterThrowing("execution(* com.project.todoappbackend.service.TaskService.*(..))")
-    public void logMethodException(JoinPoint jp){
-        log.info("Exception thrown by this method {}",jp.getSignature().getName());
+    @AfterThrowing(value = "execution(* com.project.todoappbackend.service.TaskService.*(..))",
+            throwing = "ex")
+    public void logMethodException(JoinPoint jp, Throwable ex) {
+        log.error(
+                "Exception in {}.{}() : {}",
+                jp.getSignature().getDeclaringTypeName(),   // Class Name
+                jp.getSignature().getName(),                // Method Name
+                ex.getMessage(),                            // Exception Message
+                ex                                          // Exception type, Stack trace(method calls, line numbers)
+        );
     }
 
     @AfterReturning("execution(* com.project.todoappbackend.service.TaskService.*(..))")
-    public void logMethodSuccess(JoinPoint jp){
-        log.info("Method execution success {}",jp.getSignature().getName());
+    public void logMethodSuccess(JoinPoint jp) {
+        log.info("Method execution success {}", jp.getSignature().getName());
     }
 
 
