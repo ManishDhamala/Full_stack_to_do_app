@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -143,8 +144,6 @@ class TaskServiceTest {
         TaskDto expectedTaskDto1 = new TaskDto(1L, "Task 1", true);
         TaskDto expectedTaskDto2 = new TaskDto(2L, "Task 2", false);
 
-        List<TaskDto> taskDtos = Arrays.asList(expectedTaskDto2, expectedTaskDto1);
-
 
         Sort expectedSort = Sort.by(Sort.Direction.DESC, "id");
 
@@ -175,6 +174,26 @@ class TaskServiceTest {
     }
 
     @Test
-    void deleteTask() {
+    void deleteTask_ShouldDeleteSuccessfully() {
+
+        // ARRANGE
+        Long taskId = 1L;
+
+        // Mock that task exists
+        when(taskRepository.existsById(taskId)).thenReturn(true);
+
+        // Mock deleteById to do nothing (void method)
+        doNothing().when(taskRepository).deleteById(taskId);
+
+        // ACT & ASSERT (no exception should be thrown)
+        assertThatCode(() -> taskService.deleteTask(taskId))
+                .doesNotThrowAnyException();
+
+        // VERIFY
+        verify(taskRepository, times(1)).existsById(taskId);
+        verify(taskRepository, times(1)).deleteById(taskId);
+
     }
+
+
 }
