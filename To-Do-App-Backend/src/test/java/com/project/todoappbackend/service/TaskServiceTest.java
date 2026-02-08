@@ -9,7 +9,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -64,7 +67,7 @@ class TaskServiceTest {
         assertThat(result.getTask()).isEqualTo("Test task");
         assertThat(result.getCompleted()).isFalse();
 
-         // Verify mocks were called properly
+        // Verify mocks were called properly
         verify(taskMapper, times(1)).toEntity(inputDto);
         verify(taskRepository, times(1)).save(taskEntity);
         verify(taskMapper, times(1)).toDTO(savedTaskEntity);
@@ -129,7 +132,46 @@ class TaskServiceTest {
     }
 
     @Test
-    void getAllTasks() {
+    void getAllTasks_AndReturnDto() {
+
+        // Arrange
+        Task task1 = new Task(1L, "Task 1", true);
+        Task task2 = new Task(2L, "Task 2", false);
+
+        List<Task> tasks = Arrays.asList(task2, task1);
+
+        TaskDto expectedTaskDto1 = new TaskDto(1L, "Task 1", true);
+        TaskDto expectedTaskDto2 = new TaskDto(2L, "Task 2", false);
+
+        List<TaskDto> taskDtos = Arrays.asList(expectedTaskDto2, expectedTaskDto1);
+
+
+        Sort expectedSort = Sort.by(Sort.Direction.DESC, "id");
+
+        // Mock repository to return desc sorted tasks
+        when(taskRepository.findAll(expectedSort)).thenReturn(tasks);
+
+        when(taskMapper.toDTO(task1)).thenReturn(expectedTaskDto1);
+        when(taskMapper.toDTO(task2)).thenReturn(expectedTaskDto2);
+
+        //Act
+        List<TaskDto> results = taskService.getAllTasks();
+
+        // Assert
+        assertThat(results).isNotNull();
+
+        assertThat(results.get(0).getId()).isEqualTo(2L);
+        assertThat(results.get(0).getTask()).isEqualTo("Task 2");
+        assertThat(results.get(0).getCompleted()).isFalse();
+
+        assertThat(results.get(1).getId()).isEqualTo(1L);
+        assertThat(results.get(1).getTask()).isEqualTo("Task 1");
+        assertThat(results.get(1).getCompleted()).isTrue();
+
+
+        verify(taskMapper, times(1)).toDTO(task1);
+        verify(taskMapper, times(1)).toDTO(task2);
+
     }
 
     @Test
